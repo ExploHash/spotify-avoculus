@@ -8,6 +8,10 @@ const artistsBatchSize = 50;
 
 export const state = () => ({
   index: {},
+  genres: {},
+  songs: [],
+  albums: [],
+  artists: [],
   loadingData: {}
 })
 
@@ -44,10 +48,12 @@ export const getters = {
 export const actions = {
   async buildIndex({commit, dispatch}){
     let songs = await dispatch("getSongs");
-    //Get all unique artistIds
+    //get all unquque albums
+    let albums = getUniqueAlbums(songs);
+    //Get all unique artists
     let uniqueArtists = getUniqueArtists(songs);
     //Grab all artists info
-    let [artistsGenreMapping, artistsMapping] = await Promise.all([
+    let [artistsGenreMapping, artists] = await Promise.all([
       dispatch("getArtistsGenres", uniqueArtists),
       dispatch("getArtists", uniqueArtists)
     ])
@@ -55,29 +61,28 @@ export const actions = {
     let uniqueGenres = getUniqueGenres(artistsGenreMapping);
     let genreInfoMapping = await dispatch("getGenreInfoMapping", uniqueGenres);
 
-    //build index
-    let index = {};
-    songs.forEach((song) => {
-      let {artists, album: {name: albumName, total_tracks}} = song;
-      if((total_tracks === 1)) albumName = "singles";
-      artists.forEach((artist) => {
+    //build index    
+    let index = songs.reduce((index, {id: songId, artists, album: {id: albumId, total_tracks}}) => {
+      if((total_tracks === 1)) albumId = 0;
+      artists.forEach(artist => {
         let genres = artistsGenreMapping[artist.name].filter(genre => genreInfoMapping[genre].reach > 1000);
         genres.forEach(genre => {
-          if(!index[genre]) index[genre] = {...genreInfoMapping, artists: {}};
-          if(!index[genre].artists[artist.name]) index[genre].artists[artist.name] = {...artistsMapping[artist.name], albums: {}};
-          if(!index[genre].artists[artist.name].albums[albumName]) index[genre].artists[artist.name].albums[albumName] = {...song.album, songs: []};
-          index[genre].artists[artist.name].albums[albumName].songs.push(song);
+          if(!index[genre]) index[genre] = {}
+          if(!index[genre][artist.id]) index[genre][artist.id] = {}
+          if(!index[genre][artist.id][albumId]) index[genre][artist.id][albumId] = []
+          index[genre][artist.id][albumId].push(songId);
         })
-      });
-    });
+      })
+      return index;
+    }, {});
 
     commit("setKey", {
-      index,
+      genres: genreInfoMapping,
       songs,
-      artists: artistsMapping,
-      genre: genreInfoMapping
+      artists,
+      albums,
+      index
     });
-    return songs;
   },
   async getGenreInfoMapping({commit, dispatch}, genres){
     commit("setLoading", {name: "tagInfo", message: "Grabbing genre info...", start: 0, end: genres.length});
@@ -177,10 +182,14 @@ export const actions = {
 
     return responses.reduce((acc, {items}) => {
       return [...acc, ...items]
-    }, []).reduce((acc, artist) => {
-      return {...acc, [artist.name]: artist}
     }, []);
   }
+}
+
+function getUniqueAlbums(songs){
+  return songs.reduce((acc, {album}) => {
+    return !acc.some((item) => item.id === album.id) ? [...acc, album] : acc;
+  }, []);
 }
 
 function getUniqueArtists(songs){

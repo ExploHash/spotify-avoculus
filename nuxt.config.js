@@ -9,9 +9,17 @@ export default {
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
-    ]
+    ],
+    script: [
+      {
+        src: 'https://sdk.scdn.co/spotify-player.js'
+      }
+    ],
   },
-
+  env: {
+    LAST_FM_API_KEY: process.env.LAST_FM_API_KEY,
+    SPOTIFY_CLIENT_ID: process.env.SPOTIFY_CLIENT_ID,
+  },
   // Global CSS (https://go.nuxtjs.dev/config-css)
   css: [
     'ant-design-vue/dist/antd.css'
@@ -30,10 +38,17 @@ export default {
   ],
 
   // Modules (https://go.nuxtjs.dev/config-modules)
-  modules: [
-  ],
+  modules: ['@nuxtjs/axios', 'cookie-universal-nuxt'],
+
+  serverMiddleware: [{ path: '/api', handler: '~/api/api.js' },],
 
   // Build Configuration (https://go.nuxtjs.dev/config-build)
   build: {
+    extend (config, { isDev, isClient }) {
+      config.node = {
+        fs: 'empty',
+        net: 'empty'
+      }
+    }
   }
 }

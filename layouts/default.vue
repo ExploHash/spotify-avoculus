@@ -1,62 +1,86 @@
 <template>
-  <div>
-    <Nuxt />
-  </div>
+  <a-layout>
+    <a-layout-header class="header">
+      <nav>
+        <!-- <div class="logo">Avoculus</div> -->
+        <a-menu theme="dark" mode="horizontal">
+          <a-menu-item @click="$router.push('/')" key="1">Genres</a-menu-item>
+          <a-menu-item @click="$router.push('/favourites')" key="2">Artists</a-menu-item>
+          <search />
+          <a-menu-item @click="$router.push('/favourites')" key="3">Albums</a-menu-item>
+          <a-menu-item @click="$router.push('/favourites')" key="4">Songs</a-menu-item>
+        </a-menu>
+      </nav>
+    </a-layout-header>
+    <a-layout-content>
+      <nuxt />
+    </a-layout-content>
+    <a-layout-footer>© 2020 <a href="https://nl.linkedin.com/in/jbeaart">Jimmy Beaart</a> - <a href="mailto:dev@hbohub.nl">Feedback & Contact</a></a-layout-footer>
+  </a-layout>
 </template>
 
 <style>
-html {
-  font-family:
-    'Source Sans Pro',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    'Helvetica Neue',
-    Arial,
-    sans-serif;
+body {
   font-size: 16px;
   word-spacing: 1px;
-  -ms-text-size-adjust: 100%;
-  -webkit-text-size-adjust: 100%;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-font-smoothing: antialiased;
+  color: var(--light);
   box-sizing: border-box;
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
+:root {
+  --dark: #212121;
+  --dark-lighter: #323232;
+  --accent: #0d7377;
+  --light: #14ffec;
 }
 
-.button--green {
-  display: inline-block;
-  border-radius: 4px;
-  border: 1px solid #3b8070;
-  color: #3b8070;
-  text-decoration: none;
-  padding: 10px 30px;
+
+main {
+  padding: 70px 15%;
+  padding-bottom: 70px;
 }
 
-.button--green:hover {
-  color: #fff;
-  background-color: #3b8070;
+.ant-menu{
+  background-color: var(--dark);
 }
 
-.button--grey {
-  display: inline-block;
-  border-radius: 4px;
-  border: 1px solid #35495e;
-  color: #35495e;
-  text-decoration: none;
-  padding: 10px 30px;
-  margin-left: 15px;
+.ant-layout-header{
+  background: white;
+  padding: 0px;
+  height: auto;
 }
 
-.button--grey:hover {
-  color: #fff;
-  background-color: #35495e;
+.ant-layout {
+  min-height: 100vh;
+  background-color: var(--dark-lighter);
+}
+
+header {
+  position: fixed;
+  background-color: white;
+  width: 100%;
+  z-index: 99;
+  height: auto;
+}
+
+footer{
+  position: relative;
+  width: 100%;
+  height: 70px;
+  bottom: 0px;
+}
+
+.logo {
+  font-size: 35px;
+  line-height: 45px;
+  font-family: arial;
+  width: 130px;
+  float: left;
+  height: 45px;
+  margin-right: 40px;
+  background-size: auto 45px;
+  margin-left: 25px;
+  font-weight: 700;
+  color: brown;
 }
 </style>

@@ -1,3 +1,5 @@
+import { json } from "body-parser";
+
 const axios = require("axios");
 const {default: PQueue} = require('p-queue');
 
@@ -6,11 +8,15 @@ const lastFmApiKey = process.env.LAST_FM_API_KEY
 const songsBatchSize = 50;
 const artistsBatchSize = 50;
 
+const hardlimit = 100;
+
 export const state = () => ({
   index: {},
   genres: {},
   songs: [],
   albums: [],
+  loading: false,
+  login: false,
   artists: [],
   loadingData: {}
 })
@@ -40,23 +46,78 @@ export const getters = {
   index: (state) => {
     return state.index;
   },
+  loading: (state) => {
+    return state.loading;
+  },
+  login: (state) => {
+    return state.login;
+  },
+  artists: (state) => {
+    return state.artists;
+  },
+  albums: (state) => {
+    return state.albums;
+  },
+  genres: (state) => {
+    return state.genres;
+  },
+  songs: (state) => {
+    return state.songs;
+  },
   loadingData: (state) => {
     return state.loadingData;
   },
 }
 
 export const actions = {
-  async buildIndex({commit, dispatch}){
+  async initData({dispatch, state, commit}){
+    if(await dispatch("accessTokenValid")){
+      commit("setKey", {loading: true});
+      console.log("valid");
+      //get latest artists and songs
+      await dispatch("buildSpotifyData");
+      let indexData = localStorage.getItem("index");
+      if(!indexData){
+        await dispatch("buildIndex");
+        localStorage.setItem("index", JSON.stringify(state.index));
+      }else{
+        commit("setKey", {index: JSON.parse(indexData)});
+      }
+      commit("setKey", {loading: false});
+    }else{
+      commit("setKey", {login: true});
+      
+    }
+  },
+  async accessTokenValid(){
+    try{
+      await this.$axios.$get(
+        "https://api.spotify.com/v1/me/",
+        {
+          headers: { Authorization: "Bearer " + this.$cookies.get("accessToken")}
+        }
+      );
+    }catch(err){
+      return false;
+    }
+    return true;
+  },
+  async buildSpotifyData({commit, dispatch}){
     let songs = await dispatch("getSongs");
-    //get all unquque albums
     let albums = getUniqueAlbums(songs);
-    //Get all unique artists
+    let uniqueArtists = getUniqueArtists(songs);
+    let artists = await dispatch("getArtists", uniqueArtists);
+    
+    commit("setKey", {
+      songs,
+      artists,
+      albums
+    });
+  },
+  async buildIndex({state: {songs}, commit, dispatch}){
     let uniqueArtists = getUniqueArtists(songs);
     //Grab all artists info
-    let [artistsGenreMapping, artists] = await Promise.all([
-      dispatch("getArtistsGenres", uniqueArtists),
-      dispatch("getArtists", uniqueArtists)
-    ])
+    let artistsGenreMapping = await dispatch("getArtistsGenres", uniqueArtists);
     //Grab genre info
     let uniqueGenres = getUniqueGenres(artistsGenreMapping);
     let genreInfoMapping = await dispatch("getGenreInfoMapping", uniqueGenres);
@@ -77,10 +138,7 @@ export const actions = {
     }, {});
 
     commit("setKey", {
-      genres: genreInfoMapping,
-      songs,
-      artists,
-      albums,
+      genres: uniqueGenres,
       index
     });
   },
@@ -120,7 +178,7 @@ export const actions = {
     
     let promises = [];
 
-    for (let offset = songsBatchSize; offset < total; offset += songsBatchSize) {
+    for (let offset = songsBatchSize; offset < (hardlimit || total); offset += songsBatchSize) {
       promises.push(dispatch("getSongBatch", {total, offset}));
     }
 

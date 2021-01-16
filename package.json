@@ -18,9 +18,13 @@
     "core-js": "^3.6.5",
     "dot-prop": "^6.0.1",
     "express": "^4.17.1",
+    "fibers": "^5.0.0",
+    "node-sass": "^5.0.0",
     "nuxt": "^2.14.6",
     "p-queue": "^6.6.2",
-    "querystring": "^0.2.0"
+    "querystring": "^0.2.0",
+    "sass": "^1.29.0",
+    "sass-loader": "^10.1.0"
   },
   "devDependencies": {}
 }

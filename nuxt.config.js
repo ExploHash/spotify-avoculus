@@ -38,10 +38,13 @@ export default {
   ],
 
   // Modules (https://go.nuxtjs.dev/config-modules)
-  modules: ['@nuxtjs/axios', 'cookie-universal-nuxt'],
+  modules: [
+    '@nuxtjs/axios',
+    'cookie-universal-nuxt',
+  ],
 
   serverMiddleware: [{ path: '/api', handler: '~/api/api.js' },],
-
+  ssr: false,
   // Build Configuration (https://go.nuxtjs.dev/config-build)
   build: {
     extend (config, { isDev, isClient }) {

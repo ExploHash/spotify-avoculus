@@ -3,23 +3,81 @@
     <a-layout-header class="header">
       <nav>
         <!-- <div class="logo">Avoculus</div> -->
-        <a-menu theme="dark" mode="horizontal">
-          <a-menu-item @click="$router.push('/')" key="1">Genres</a-menu-item>
-          <a-menu-item @click="$router.push('/favourites')" key="2">Artists</a-menu-item>
-          <search />
-          <a-menu-item @click="$router.push('/favourites')" key="3">Albums</a-menu-item>
-          <a-menu-item @click="$router.push('/favourites')" key="4">Songs</a-menu-item>
+        <a-menu :selectedKeys="selectedItem" theme="dark" mode="horizontal">
+          <a-menu-item style="cursor: default" disabled key="1"><search /></a-menu-item>
+          <a-menu-item @click="$router.push('/')" key="index">Genres</a-menu-item>
+          <a-menu-item @click="$router.push('/artists')" key="artists">Artists</a-menu-item>
+          <a-menu-item @click="$router.push('/albums')" key="albums">Albums</a-menu-item>
         </a-menu>
-      </nav>
+    </nav>
     </a-layout-header>
-    <a-layout-content>
-      <nuxt />
-    </a-layout-content>
-    <a-layout-footer>© 2020 <a href="https://nl.linkedin.com/in/jbeaart">Jimmy Beaart</a> - <a href="mailto:dev@hbohub.nl">Feedback & Contact</a></a-layout-footer>
+    <a-layout>
+      <a-modal dialogClass="nobuttondialog" :closable="false" v-model="loading" title="Building">
+        <div v-for="(loading, name) in loadingData" v-bind:key="name">
+          <p>{{ loading.start}} / {{ loading.end }} {{ loading.message }} </p>
+          <a-progress :percent="Math.round(loading.start / loading.end * 100)" size="small" />
+        </div>
+      </a-modal>
+      <a-modal dialogClass="nobuttondialog" :closable="false" v-model="login" title="Please login">
+        <button @click="loginWithSpotify">Login with spotify</button>
+      </a-modal>
+      <a-layout-content><nuxt/></a-layout-content>
+      <a-layout-sider width="20%">
+        <musicplaylist/>
+      </a-layout-sider>
+    </a-layout>
+    <a-layout-footer>
+      <musicplayer/>
+    </a-layout-footer>
   </a-layout>
 </template>
+<script>
+import { mapGetters } from "vuex";
+import musicplayer from '../components/musicplayer.vue';
+import Musicplaylist from '../components/musicplaylist.vue';
+let spotifyClientId = process.env.SPOTIFY_CLIENT_ID;
+
+export default {
+  components: { musicplayer, Musicplaylist },
+  data(){
+    return {
+      selectedItem: [],
+    } 
+  },
+  watch:{
+    $route (to, from){
+      this.selectedItem = [to.name];
+    }
+  }, 
+  computed: {
+    ...mapGetters(["loading", "loadingData", "login"])
+  },
+  mounted(){
+    this.selectedItem = [this.$router.currentRoute.name];
+  },
+  methods: {
+    loginWithSpotify(){
+      console.log("Werkt dit?");
+      var scopes = "user-library-read user-modify-playback-state streaming user-read-email user-read-private";
+      window.location.href = 'https://accounts.spotify.com/authorize' +
+      '?response_type=code' +
+      `&client_id=${spotifyClientId}` +
+      (scopes ? '&scope=' + encodeURIComponent(scopes) : '') +
+      '&redirect_uri=' + encodeURIComponent("http://localhost:3000/api/spotifywebhook");
+    }
+  },
+  async fetch() {
+    await this.$store.dispatch("initData");
+  },
+  fetchOnServer: false
+}
+</script>
 
 <style>
+
+html {
+  scroll-behavior: smooth;
+}
 body {
   font-size: 16px;
   word-spacing: 1px;
@@ -35,13 +93,17 @@ body {
 }
 
 
-main {
+/* main {
   padding: 70px 15%;
   padding-bottom: 70px;
-}
+} */
 
 .ant-menu{
   background-color: var(--dark);
+}
+
+.ant-menu-item{
+  margin-left: 20px;
 }
 
 .ant-layout-header{
@@ -49,10 +111,16 @@ main {
   padding: 0px;
   height: auto;
 }
+.ant-layout-footer{
+  padding: 10px;
+}
 
-.ant-layout {
-  min-height: 100vh;
+.ant-layout{
+  height: 100vh;
+}
+.ant-layout-content {
   background-color: var(--dark-lighter);
+  padding: 5em;
 }
 
 header {
@@ -82,5 +150,8 @@ footer{
   margin-left: 25px;
   font-weight: 700;
   color: brown;
+}
+.nobuttondialog .ant-btn {
+  display: none;
 }
 </style>

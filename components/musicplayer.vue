@@ -1,6 +1,6 @@
 <template>
   <div class="musicplayer">
-    <img v-if="playlist.length > 0" height="50px" :src="currentTrack.album.images[0].url">
+    <img v-if="playlist.length > 0" height="50px" :src="currentTrack.album.images ? currentTrack.album.images[0].url : currentTrack.album.image">
     <div v-if="playlist.length > 0" class="songinformation">
       <span>{{ currentTrack.name }}</span>
       <span>{{ currentTrack.artists[0].name }}</span>
@@ -34,7 +34,7 @@ export default {
   methods: {
     ...mapActions({next: "player/next", previous: "player/previous", toggle: "player/toggle"}),
   },
-  async mounted() {
+  async beforeCreate() {
     window.onSpotifyWebPlaybackSDKReady = async () => {
       await this.$store.dispatch("player/initialize");
     }

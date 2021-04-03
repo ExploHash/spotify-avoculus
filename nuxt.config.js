@@ -9,12 +9,7 @@ export default {
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
-    ],
-    script: [
-      {
-        src: 'https://sdk.scdn.co/spotify-player.js'
-      }
-    ],
+    ]
   },
   env: {
     LAST_FM_API_KEY: process.env.LAST_FM_API_KEY,

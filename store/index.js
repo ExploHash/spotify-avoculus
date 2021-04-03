@@ -8,7 +8,7 @@ const lastFmApiKey = process.env.LAST_FM_API_KEY
 const songsBatchSize = 50;
 const artistsBatchSize = 50;
 
-const hardlimit = 100;
+const hardlimit = false;
 
 export const state = () => ({
   index: {},
@@ -127,6 +127,8 @@ export const actions = {
       if((total_tracks === 1)) albumId = 0;
       artists.forEach(artist => {
         let genres = artistsGenreMapping[artist.name].filter(genre => genreInfoMapping[genre].reach > 1000);
+        if(genres.length === 0) genres = ["Unkown"];
+
         genres.forEach(genre => {
           if(!index[genre]) index[genre] = {}
           if(!index[genre][artist.id]) index[genre][artist.id] = {}
@@ -171,6 +173,7 @@ export const actions = {
     return response;
   },
   async getSongs({commit, dispatch}){
+    console.log("AAA");
     commit("setLoading", {name: "songs", message: "Grabbing song data...", start: 0, end: songsBatchSize});
     //Make first call to get total and such
     let {total, items: songs} = await dispatch("getSongBatch");
@@ -194,6 +197,7 @@ export const actions = {
         headers: { Authorization: "Bearer " + this.$cookies.get("accessToken")}
       }
     );
+    console.log("AAA");
     commit("setLoading", {name: "songs", add: total - offset < songsBatchSize ? total - offset : songsBatchSize});
 
     return {...response, items: response.items.map((item) => item.track)};

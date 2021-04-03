@@ -4,7 +4,6 @@
       <nav>
         <!-- <div class="logo">Avoculus</div> -->
         <a-menu :selectedKeys="selectedItem" theme="dark" mode="horizontal">
-          <a-menu-item style="cursor: default" disabled key="1"><search /></a-menu-item>
           <a-menu-item @click="$router.push('/')" key="index">Genres</a-menu-item>
           <a-menu-item @click="$router.push('/artists')" key="artists">Artists</a-menu-item>
           <a-menu-item @click="$router.push('/albums')" key="albums">Albums</a-menu-item>
@@ -22,13 +21,14 @@
         <button @click="loginWithSpotify">Login with spotify</button>
       </a-modal>
       <a-layout-content><nuxt/></a-layout-content>
-      <a-layout-sider width="20%">
+      <a-layout-sider width="25%">
         <musicplaylist/>
       </a-layout-sider>
     </a-layout>
     <a-layout-footer>
       <musicplayer/>
     </a-layout-footer>
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
   </a-layout>
 </template>
 <script>
@@ -81,7 +81,7 @@ html {
 body {
   font-size: 16px;
   word-spacing: 1px;
-  color: var(--light);
+  color: black;
   box-sizing: border-box;
 }
 
@@ -92,7 +92,9 @@ body {
   --light: #14ffec;
 }
 
-
+* {
+ box-sizing: border-box;
+}
 /* main {
   padding: 70px 15%;
   padding-bottom: 70px;
@@ -103,10 +105,11 @@ body {
 }
 
 .ant-menu-item{
-  margin-left: 20px;
+  margin-right: 20px;
 }
 
 .ant-layout-header{
+  position: relative;
   background: white;
   padding: 0px;
   height: auto;
@@ -119,7 +122,7 @@ body {
   height: 100vh;
 }
 .ant-layout-content {
-  background-color: var(--dark-lighter);
+  background-color: whitesmoke;
   padding: 5em;
 }
 
@@ -136,6 +139,11 @@ footer{
   width: 100%;
   height: 70px;
   bottom: 0px;
+  box-shadow: 1px 0px 5px 0px rgba(0,0,0,0.75);
+}
+
+aside {
+  overflow: auto;
 }
 
 .logo {

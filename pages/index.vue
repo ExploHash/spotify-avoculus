@@ -1,6 +1,6 @@
 <template>
   <main>
-    <musicpreview v-for="genre in Object.keys(index)" :name="genre" :imageurls="grabArtistImageByGenre(genre)" :link="'/artists?genre=' + genre" class="item" v-bind:key="genre"/>
+    <musicpreview v-for="genre in Object.keys(index).sort((a,b) => b.toLowerCase().localeCompare(a.toLowerCase()) * -1)" :indexPart="index[genre]" :name="genre" :imageurls="grabArtistImageByGenre(genre)" :link="'/artists?genre=' + genre" class="item" v-bind:key="genre"/>
   </main>
 </template>
 
